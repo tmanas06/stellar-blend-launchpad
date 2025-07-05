@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Menu, X, Search, Bell } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 interface NavigationProps {
   connectedWallet: boolean;
@@ -11,13 +12,25 @@ interface NavigationProps {
 
 const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
+  const navLinks = [
+    { path: "/projects", label: "Projects" },
+    { path: "/how-it-works", label: "How it Works" },
+    { path: "/analytics", label: "Analytics" },
+    { path: "/community", label: "Community" }
+  ];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800/50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
+          <Link to="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/25">
               <span className="text-white font-bold text-lg">B</span>
             </div>
@@ -25,22 +38,23 @@ const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
               <h1 className="text-xl font-bold text-white">Blend SCF</h1>
               <p className="text-xs text-gray-400 -mt-1">Launchpad</p>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-gray-300 hover:text-cyan-400 font-medium transition-colors">
-              Projects
-            </a>
-            <a href="#" className="text-gray-300 hover:text-cyan-400 font-medium transition-colors">
-              How it Works
-            </a>
-            <a href="#" className="text-gray-300 hover:text-cyan-400 font-medium transition-colors">
-              Analytics
-            </a>
-            <a href="#" className="text-gray-300 hover:text-cyan-400 font-medium transition-colors">
-              Community
-            </a>
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`font-medium transition-colors ${
+                  isActive(link.path)
+                    ? "text-cyan-400"
+                    : "text-gray-300 hover:text-cyan-400"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
 
           {/* Desktop Actions */}
@@ -87,18 +101,20 @@ const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-800/50 py-4 bg-black/90 backdrop-blur-md">
             <div className="flex flex-col space-y-4">
-              <a href="#" className="text-gray-300 hover:text-cyan-400 font-medium px-2 py-1">
-                Projects
-              </a>
-              <a href="#" className="text-gray-300 hover:text-cyan-400 font-medium px-2 py-1">
-                How it Works
-              </a>
-              <a href="#" className="text-gray-300 hover:text-cyan-400 font-medium px-2 py-1">
-                Analytics
-              </a>
-              <a href="#" className="text-gray-300 hover:text-cyan-400 font-medium px-2 py-1">
-                Community
-              </a>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`font-medium px-2 py-1 transition-colors ${
+                    isActive(link.path)
+                      ? "text-cyan-400"
+                      : "text-gray-300 hover:text-cyan-400"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
               {!connectedWallet && (
                 <Button 
                   onClick={onConnectWallet}
