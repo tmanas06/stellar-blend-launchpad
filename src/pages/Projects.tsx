@@ -1,18 +1,21 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter, SortAsc } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Search, Filter, SortAsc, Plus, Users, Code } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import ProjectCard from "@/components/ProjectCard";
+import AddProjectForm from "@/components/AddProjectForm";
 
 const Projects = () => {
   const [connectedWallet, setConnectedWallet] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [userRole, setUserRole] = useState<"investor" | "developer">("investor");
+  const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
 
   const allProjects = [
     {
@@ -153,6 +156,36 @@ const Projects = () => {
               </p>
             </div>
 
+            {/* Role Selection */}
+            <div className="flex justify-center mb-8">
+              <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-xl p-2 flex">
+                <Button
+                  variant={userRole === "investor" ? "default" : "ghost"}
+                  onClick={() => setUserRole("investor")}
+                  className={`flex items-center gap-2 ${
+                    userRole === "investor" 
+                      ? "bg-cyan-500 hover:bg-cyan-600 text-white" 
+                      : "text-gray-300 hover:text-cyan-400 hover:bg-gray-800/50"
+                  }`}
+                >
+                  <Users className="h-4 w-4" />
+                  Investor
+                </Button>
+                <Button
+                  variant={userRole === "developer" ? "default" : "ghost"}
+                  onClick={() => setUserRole("developer")}
+                  className={`flex items-center gap-2 ${
+                    userRole === "developer" 
+                      ? "bg-purple-500 hover:bg-purple-600 text-white" 
+                      : "text-gray-300 hover:text-purple-400 hover:bg-gray-800/50"
+                  }`}
+                >
+                  <Code className="h-4 w-4" />
+                  Developer
+                </Button>
+              </div>
+            </div>
+
             {/* Filters */}
             <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6 mb-8">
               <div className="grid md:grid-cols-4 gap-4">
@@ -194,6 +227,22 @@ const Projects = () => {
                 </Select>
 
                 <div className="flex items-center gap-2">
+                  {userRole === "developer" && (
+                    <Dialog open={isAddProjectOpen} onOpenChange={setIsAddProjectOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white font-semibold shadow-md shadow-purple-500/25">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Project
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle className="text-2xl font-bold text-white">Create New Project</DialogTitle>
+                        </DialogHeader>
+                        <AddProjectForm onClose={() => setIsAddProjectOpen(false)} />
+                      </DialogContent>
+                    </Dialog>
+                  )}
                   <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
                     {filteredProjects.length} Projects
                   </Badge>
@@ -208,7 +257,7 @@ const Projects = () => {
           <div className="max-w-7xl mx-auto">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+                <ProjectCard key={project.id} project={project} userRole={userRole} />
               ))}
             </div>
             

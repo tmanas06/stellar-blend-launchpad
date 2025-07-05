@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, Users, Clock, Shield } from "lucide-react";
+import { ArrowRight, Users, Clock, Shield, HandHeart } from "lucide-react";
 
 interface ProjectCardProps {
   project: {
@@ -21,9 +21,10 @@ interface ProjectCardProps {
     scfRound: number;
     teamSize: number;
   };
+  userRole: "investor" | "developer";
 }
 
-const ProjectCard = ({ project }: ProjectCardProps) => {
+const ProjectCard = ({ project, userRole }: ProjectCardProps) => {
   const progressPercentage = (project.currentAmount / project.targetAmount) * 100;
   
   const getRiskColor = (risk: string) => {
@@ -45,22 +46,22 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
   };
 
   return (
-    <Card className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-200 transform hover:scale-105">
+    <Card className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-cyan-400/50 transform hover:scale-105 bg-gray-900/50 backdrop-blur-sm border-gray-700">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="outline" className="text-xs font-medium">
+              <Badge variant="outline" className="text-xs font-medium border-cyan-400/30 text-cyan-400">
                 SCF Round {project.scfRound}
               </Badge>
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs bg-purple-500/20 text-purple-400 border-purple-500/30">
                 {project.category}
               </Badge>
             </div>
-            <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+            <CardTitle className="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors">
               {project.name}
             </CardTitle>
-            <p className="text-gray-600 text-sm mt-2 line-clamp-2">
+            <p className="text-gray-300 text-sm mt-2 line-clamp-2">
               {project.description}
             </p>
           </div>
@@ -130,10 +131,23 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
 
         {/* Action Button */}
         <Button 
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 group-hover:bg-blue-700"
+          className={`w-full font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ${
+            userRole === "investor" 
+              ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white"
+              : "bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white"
+          }`}
         >
-          Invest Now
-          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          {userRole === "investor" ? (
+            <>
+              Invest Now
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </>
+          ) : (
+            <>
+              Collaborate
+              <HandHeart className="ml-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+            </>
+          )}
         </Button>
       </CardContent>
     </Card>
