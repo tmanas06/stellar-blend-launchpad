@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,11 +8,14 @@ import { ArrowRight, Shield, TrendingUp, Users, Zap } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import ProjectCard from "@/components/ProjectCard";
 import StatsSection from "@/components/StatsSection";
+import { connectFreighterWallet, isFreighterInstalled } from "@/utils/freighterWallet";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [connectedWallet, setConnectedWallet] = useState(false);
   const [userRole, setUserRole] = useState<"investor" | "developer">("investor");
   const [walletPublicKey, setWalletPublicKey] = useState<string>("");
+  const { toast } = useToast();
 
   const featuredProjects = [
     {
@@ -61,7 +65,37 @@ const Index = () => {
     }
   ];
 
-  const handleConnectWallet = (publicKey: string) => {
+  const handleConnectWallet = async () => {
+    if (!isFreighterInstalled()) {
+      toast({
+        title: "Freighter Wallet Required",
+        description: "Please install Freighter wallet extension to continue.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const publicKey = await connectFreighterWallet();
+      if (publicKey) {
+        setConnectedWallet(true);
+        setWalletPublicKey(publicKey);
+        toast({
+          title: "Wallet Connected!",
+          description: `Connected to ${publicKey.slice(0, 4)}...${publicKey.slice(-4)}`,
+        });
+        console.log('Wallet connected with public key:', publicKey);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Connection Failed",
+        description: error.message || "Failed to connect to Freighter wallet",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleWalletConnect = (publicKey: string) => {
     setConnectedWallet(true);
     setWalletPublicKey(publicKey);
     console.log('Wallet connected with public key:', publicKey);
@@ -78,7 +112,7 @@ const Index = () => {
       </div>
       
       <div className="relative z-10">
-        <Navigation connectedWallet={connectedWallet} onConnectWallet={handleConnectWallet} />
+        <Navigation connectedWallet={connectedWallet} onConnectWallet={handleWalletConnect} />
         
         {/* Hero Section */}
         <section className="pt-20 pb-16 px-4">
