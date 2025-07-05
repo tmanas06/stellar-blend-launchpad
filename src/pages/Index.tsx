@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +10,7 @@ import StatsSection from "@/components/StatsSection";
 
 const Index = () => {
   const [connectedWallet, setConnectedWallet] = useState(false);
+  const [userRole, setUserRole] = useState<"investor" | "developer">("investor");
 
   const featuredProjects = [
     {
@@ -193,7 +193,7 @@ const Index = () => {
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+                <ProjectCard key={project.id} project={project} userRole={userRole} />
               ))}
             </div>
             
