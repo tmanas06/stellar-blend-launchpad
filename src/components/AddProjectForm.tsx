@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { storeProjectData } from "@/utils/ipfsStorage";
+import { getFreighterPublicKey } from "@/utils/freighterWallet";
 
 interface AddProjectFormProps {
   onClose: () => void;
@@ -12,6 +14,7 @@ interface AddProjectFormProps {
 
 const AddProjectForm = ({ onClose }: AddProjectFormProps) => {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -24,16 +27,52 @@ const AddProjectForm = ({ onClose }: AddProjectFormProps) => {
     teamSize: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Project submitted:", formData);
+    setIsSubmitting(true);
     
-    toast({
-      title: "Project Submitted!",
-      description: "Your project has been submitted for review.",
-    });
-    
-    onClose();
+    try {
+      // Get connected wallet public key
+      const publicKey = await getFreighterPublicKey();
+      
+      // Prepare project data for IPFS
+      const projectData = {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        targetAmount: parseInt(formData.targetAmount),
+        apy: parseFloat(formData.apy),
+        riskLevel: formData.riskLevel,
+        duration: parseInt(formData.duration),
+        minInvestment: parseInt(formData.minInvestment),
+        teamSize: parseInt(formData.teamSize),
+        createdBy: publicKey || 'anonymous',
+        createdAt: new Date().toISOString()
+      };
+
+      console.log("Storing project data to IPFS:", projectData);
+      
+      // Store to IPFS
+      const ipfsHash = await storeProjectData(projectData);
+      
+      console.log("Project stored on IPFS with hash:", ipfsHash);
+      
+      toast({
+        title: "Project Submitted Successfully!",
+        description: `Your project has been stored on IPFS (${ipfsHash.slice(0, 8)}...) and submitted for review.`,
+      });
+      
+      onClose();
+    } catch (error: any) {
+      console.error("Error submitting project:", error);
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Failed to submit project. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (field: string, value: string) => {
@@ -174,15 +213,17 @@ const AddProjectForm = ({ onClose }: AddProjectFormProps) => {
           type="button"
           variant="outline"
           onClick={onClose}
+          disabled={isSubmitting}
           className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-800"
         >
           Cancel
         </Button>
         <Button
           type="submit"
-          className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white"
+          disabled={isSubmitting}
+          className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white disabled:opacity-50"
         >
-          Submit Project
+          {isSubmitting ? 'Storing on IPFS...' : 'Submit Project'}
         </Button>
       </div>
     </form>

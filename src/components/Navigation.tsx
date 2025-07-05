@@ -4,14 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Menu, X, Search, Bell } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { connectFreighterWallet, isFreighterInstalled } from "@/utils/freighterWallet";
+import { useToast } from "@/hooks/use-toast";
 
 interface NavigationProps {
   connectedWallet: boolean;
-  onConnectWallet: () => void;
+  onConnectWallet: (publicKey: string) => void;
 }
 
 const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const { toast } = useToast();
   const location = useLocation();
 
   const isActive = (path: string) => {
@@ -24,6 +28,38 @@ const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
     { path: "/analytics", label: "Analytics" },
     { path: "/community", label: "Community" }
   ];
+
+  const handleConnectWallet = async () => {
+    if (!isFreighterInstalled()) {
+      toast({
+        title: "Freighter Wallet Required",
+        description: "Please install Freighter wallet extension to continue.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsConnecting(true);
+    
+    try {
+      const publicKey = await connectFreighterWallet();
+      if (publicKey) {
+        onConnectWallet(publicKey);
+        toast({
+          title: "Wallet Connected!",
+          description: `Connected to ${publicKey.slice(0, 4)}...${publicKey.slice(-4)}`,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Connection Failed",
+        description: error.message || "Failed to connect to Freighter wallet",
+        variant: "destructive"
+      });
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800/50">
@@ -70,16 +106,17 @@ const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
                 </Button>
                 <div className="flex items-center space-x-3 px-3 py-2 bg-green-500/20 rounded-lg border border-green-500/30 backdrop-blur-sm">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-green-400">GDAI...X7K9</span>
+                  <span className="text-sm font-medium text-green-400">Connected</span>
                 </div>
               </>
             )}
             {!connectedWallet && (
               <Button 
-                onClick={onConnectWallet}
-                className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-semibold px-6 py-2 rounded-lg shadow-md shadow-cyan-500/25 hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-300 border border-cyan-400/30"
+                onClick={handleConnectWallet}
+                disabled={isConnecting}
+                className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-semibold px-6 py-2 rounded-lg shadow-md shadow-cyan-500/25 hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-300 border border-cyan-400/30 disabled:opacity-50"
               >
-                Connect Wallet
+                {isConnecting ? 'Connecting...' : 'Connect Freighter'}
               </Button>
             )}
           </div>
@@ -117,10 +154,11 @@ const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
               ))}
               {!connectedWallet && (
                 <Button 
-                  onClick={onConnectWallet}
-                  className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-semibold mx-2 mt-4 shadow-md shadow-cyan-500/25"
+                  onClick={handleConnectWallet}
+                  disabled={isConnecting}
+                  className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-semibold mx-2 mt-4 shadow-md shadow-cyan-500/25 disabled:opacity-50"
                 >
-                  Connect Wallet
+                  {isConnecting ? 'Connecting...' : 'Connect Freighter'}
                 </Button>
               )}
             </div>

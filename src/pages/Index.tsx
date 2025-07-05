@@ -11,6 +11,7 @@ import StatsSection from "@/components/StatsSection";
 const Index = () => {
   const [connectedWallet, setConnectedWallet] = useState(false);
   const [userRole, setUserRole] = useState<"investor" | "developer">("investor");
+  const [walletPublicKey, setWalletPublicKey] = useState<string>("");
 
   const featuredProjects = [
     {
@@ -60,9 +61,10 @@ const Index = () => {
     }
   ];
 
-  const handleConnectWallet = () => {
+  const handleConnectWallet = (publicKey: string) => {
     setConnectedWallet(true);
-    // In a real implementation, this would connect to Freighter/Albedo/xBull
+    setWalletPublicKey(publicKey);
+    console.log('Wallet connected with public key:', publicKey);
   };
 
   return (
