@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNetwork } from '@/contexts/NetworkContext';
@@ -44,45 +44,61 @@ export default function BlendServices() {
     },
   ];
 
-  const handleServiceAction = async (service: Service) => {
-    if (service.disabled) return;
-  
-    if (!isConnected) {
-      await connect();
-      return;
+  // Use a ref to track if we've processed the action
+  const isProcessingRef = useRef<string | null>(null);
+
+  // Handle side effects when processing state changes
+  useEffect(() => {
+    // Only show toasts when processing starts/stops
+    if (isProcessing) {
+      toast.info('Preparing transaction...');
+    } else if (isProcessingRef.current) {
+      // If we were processing but now we're not, show success
+      toast.success('Transaction completed successfully!');
     }
-  
-    const processTransaction = async () => {
-      try {
-        setIsProcessing(service.id);
-        
-        if (service.id === 'liquidity') {
-          const networkType = network === 'testnet' ? 'TESTNET' : 'MAINNET';
-          const contracts = getContracts(networkType);
-          
-          // Example: Use the pool factory address
-          const poolFactoryAddress = contracts.POOL_FACTORY;
-          toast.info(`Connecting to pool factory at: ${poolFactoryAddress}`);
-          
-          // Here you would:
-          // 1. Create a transaction to add liquidity
-          // 2. Sign it with the wallet
-          // 3. Submit it to the network
-  
-          // Simulate transaction processing
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
-          toast.success('Liquidity added successfully!');
-        }
-      } catch (error) {
-        console.error('Transaction failed:', error);
-        toast.error('Failed to process transaction');
-      } finally {
-        setIsProcessing(null);
+    
+    // Update the ref
+    isProcessingRef.current = isProcessing;
+    
+    // Cleanup function
+    return () => {
+      if (isProcessingRef.current && !isProcessing) {
+        // If component unmounts while processing
+        toast.dismiss();
       }
     };
-  
-    setTimeout(processTransaction, 0);
+  }, [isProcessing]);
+
+  const handleServiceAction = async (service: Service) => {
+    if (service.disabled || isProcessing) return;
+    
+    try {
+      // Connect wallet if not connected
+      if (!isConnected) {
+        await connect();
+        return;
+      }
+      
+      // Start processing
+      setIsProcessing(service.id);
+      
+      // Get network config
+      const networkType = network === 'testnet' ? 'TESTNET' : 'MAINNET';
+      const contracts = getContracts(networkType);
+      
+      // Here you would:
+      // 1. Create a transaction to add liquidity
+      // 2. Sign it with the wallet
+      // 3. Submit it to the network
+      // For now, we'll just simulate the transaction
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+    } catch (error) {
+      console.error('Transaction failed:', error);
+      toast.error('Failed to process transaction');
+    } finally {
+      setIsProcessing(null);
+    }
   };
 
   return (
