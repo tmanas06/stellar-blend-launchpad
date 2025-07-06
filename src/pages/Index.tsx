@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,7 @@ import { ArrowRight, Shield, TrendingUp, Users, Zap } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import ProjectCard from "@/components/ProjectCard";
 import StatsSection from "@/components/StatsSection";
-import { connectWallet } from "@/utils/walletConnect";
+import { connectFreighterWallet, checkFreighterInstalled, getFreighterPublicKey } from "@/utils/freighterWallet";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -19,9 +20,32 @@ const Index = () => {
   // Empty projects array - will be populated via add project functionality
   const featuredProjects: any[] = [];
 
+  useEffect(() => {
+    // Check if wallet is already connected on page load
+    const checkExistingConnection = async () => {
+      const publicKey = await getFreighterPublicKey();
+      if (publicKey) {
+        setConnectedWallet(true);
+        setWalletPublicKey(publicKey);
+        console.log('Existing wallet connection found:', publicKey);
+      }
+    };
+    
+    checkExistingConnection();
+  }, []);
+
   const handleConnectWallet = async () => {
     try {
-      const publicKey = await connectWallet();
+      if (!checkFreighterInstalled()) {
+        toast({
+          title: "Freighter Not Installed",
+          description: "Please install Freighter wallet extension from https://www.freighter.app/",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const publicKey = await connectFreighterWallet();
       if (publicKey) {
         setConnectedWallet(true);
         setWalletPublicKey(publicKey);
@@ -46,6 +70,12 @@ const Index = () => {
     console.log('Wallet connected with public key:', publicKey);
   };
 
+  const handleWalletDisconnect = () => {
+    setConnectedWallet(false);
+    setWalletPublicKey("");
+    console.log('Wallet disconnected');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black relative overflow-hidden">
       {/* Animated background elements */}
@@ -57,7 +87,12 @@ const Index = () => {
       </div>
       
       <div className="relative z-10">
-        <Navigation connectedWallet={connectedWallet} onConnectWallet={handleWalletConnect} />
+        <Navigation 
+          connectedWallet={connectedWallet} 
+          walletPublicKey={walletPublicKey}
+          onConnectWallet={handleWalletConnect} 
+          onDisconnectWallet={handleWalletDisconnect}
+        />
         
         {/* Hero Section */}
         <section className="pt-20 pb-16 px-4">
@@ -162,7 +197,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Featured Projects */}
         <section className="py-20 px-4 bg-gradient-to-r from-gray-900/80 to-purple-900/80 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
@@ -197,7 +231,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* CTA Section */}
         <section className="py-20 px-4 bg-gradient-to-r from-cyan-600/80 to-purple-600/80 backdrop-blur-sm border-t border-gray-800/50">
           <div className="max-w-4xl mx-auto text-center text-white">
             <h2 className="text-4xl font-bold mb-6">Ready to Start Investing?</h2>
@@ -214,7 +247,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Footer */}
         <footer className="py-12 px-4 bg-black border-t border-gray-800">
           <div className="max-w-7xl mx-auto">
             <div className="grid md:grid-cols-4 gap-8">
@@ -243,7 +275,7 @@ const Index = () => {
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold mb-4 text-white">Legal</h4>
+                <h4 className="font-semilombold mb-4 text-white">Legal</h4>
                 <ul className="space-y-2 text-gray-400">
                   <li>Terms of Service</li>
                   <li>Privacy Policy</li>

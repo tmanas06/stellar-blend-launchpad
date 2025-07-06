@@ -1,22 +1,26 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, Search, Bell } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
-import { connectWallet } from "@/utils/walletConnect";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Menu, X, Search, Bell, User, LogOut, Wallet } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { connectFreighterWallet, disconnectFreighterWallet, checkFreighterInstalled } from "@/utils/freighterWallet";
 import { useToast } from "@/hooks/use-toast";
 
 interface NavigationProps {
   connectedWallet: boolean;
+  walletPublicKey: string;
   onConnectWallet: (publicKey: string) => void;
+  onDisconnectWallet: () => void;
 }
 
-const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
+const Navigation = ({ connectedWallet, walletPublicKey, onConnectWallet, onDisconnectWallet }: NavigationProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -33,7 +37,16 @@ const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
     setIsConnecting(true);
     
     try {
-      const publicKey = await connectWallet();
+      if (!checkFreighterInstalled()) {
+        toast({
+          title: "Freighter Not Installed",
+          description: "Please install Freighter wallet extension from https://www.freighter.app/",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const publicKey = await connectFreighterWallet();
       if (publicKey) {
         onConnectWallet(publicKey);
         toast({
@@ -50,6 +63,19 @@ const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
     } finally {
       setIsConnecting(false);
     }
+  };
+
+  const handleDisconnectWallet = () => {
+    disconnectFreighterWallet();
+    onDisconnectWallet();
+    toast({
+      title: "Wallet Disconnected",
+      description: "Your wallet has been disconnected",
+    });
+  };
+
+  const handleProfileClick = () => {
+    navigate(`/profile/${walletPublicKey}`);
   };
 
   return (
@@ -95,10 +121,27 @@ const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
                   <Bell className="h-4 w-4" />
                   <Badge className="absolute -top-1 -right-1 w-2 h-2 p-0 bg-red-500"></Badge>
                 </Button>
-                <div className="flex items-center space-x-3 px-3 py-2 bg-green-500/20 rounded-lg border border-green-500/30 backdrop-blur-sm">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-green-400">Connected</span>
-                </div>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center space-x-3 px-3 py-2 bg-green-500/20 rounded-lg border border-green-500/30 backdrop-blur-sm hover:bg-green-500/30">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-medium text-green-400">
+                        {walletPublicKey.slice(0, 4)}...{walletPublicKey.slice(-4)}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 bg-gray-900 border-gray-700">
+                    <DropdownMenuItem onClick={handleProfileClick} className="text-gray-300 hover:text-cyan-400 hover:bg-gray-800">
+                      <User className="h-4 w-4 mr-2" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDisconnectWallet} className="text-gray-300 hover:text-red-400 hover:bg-gray-800">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Disconnect
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             )}
             {!connectedWallet && (
@@ -107,7 +150,8 @@ const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
                 disabled={isConnecting}
                 className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-semibold px-6 py-2 rounded-lg shadow-md shadow-cyan-500/25 hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-300 border border-cyan-400/30 disabled:opacity-50"
               >
-                {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+                <Wallet className="h-4 w-4 mr-2" />
+                {isConnecting ? 'Connecting...' : 'Connect Freighter'}
               </Button>
             )}
           </div>
@@ -143,13 +187,40 @@ const Navigation = ({ connectedWallet, onConnectWallet }: NavigationProps) => {
                   {link.label}
                 </Link>
               ))}
+              {connectedWallet && (
+                <>
+                  <Button
+                    onClick={() => {
+                      handleProfileClick();
+                      setMobileMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="justify-start text-gray-300 hover:text-cyan-400"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      handleDisconnectWallet();
+                      setMobileMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="justify-start text-gray-300 hover:text-red-400"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Disconnect
+                  </Button>
+                </>
+              )}
               {!connectedWallet && (
                 <Button 
                   onClick={handleConnectWallet}
                   disabled={isConnecting}
                   className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-semibold mx-2 mt-4 shadow-md shadow-cyan-500/25 disabled:opacity-50"
                 >
-                  {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+                  <Wallet className="h-4 w-4 mr-2" />
+                  {isConnecting ? 'Connecting...' : 'Connect Freighter'}
                 </Button>
               )}
             </div>

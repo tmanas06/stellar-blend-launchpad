@@ -9,6 +9,7 @@ import Projects from "./pages/Projects";
 import Analytics from "./pages/Analytics";
 import HowItWorks from "./pages/HowItWorks";
 import Community from "./pages/Community";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/community" element={<Community />} />
+          <Route path="/profile/:publicKey" element={<Profile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
