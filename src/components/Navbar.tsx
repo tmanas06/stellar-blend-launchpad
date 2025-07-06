@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WalletConnect } from './WalletConnect';
+import { NetworkSwitcher } from '@/components/ui/network-switcher';
 
 const Navbar = () => {
   const location = useLocation();
@@ -41,7 +42,9 @@ const Navbar = () => {
           </div>
         </nav>
         
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
+          <NetworkSwitcher />
+          <div className="hidden sm:block w-px h-6 bg-border" />
           <WalletConnect />
         </div>
       </div>

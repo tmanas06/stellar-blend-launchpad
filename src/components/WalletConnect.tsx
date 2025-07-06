@@ -14,23 +14,21 @@ export const WalletConnect: React.FC<{
   const {
     isConnected,
     publicKey,
-    network: freighterNetwork,
     isLoading,
     error,
     connect,
     disconnect,
   } = useFreighter();
   
-  const { network: contextNetwork } = useNetwork();
+  const { network } = useNetwork();
   
-  // Use Freighter network if available, otherwise fall back to context network
-  const networkName = (freighterNetwork || contextNetwork || 'Testnet').toUpperCase();
+  // Always use the network from our NetworkContext
+  const networkName = network === 'mainnet' ? 'MAINNET' : 'TESTNET';
   
   // Debug log to help track network values
   useEffect(() => {
-    console.log('Freighter Network:', freighterNetwork);
-    console.log('Context Network:', contextNetwork);
-  }, [freighterNetwork, contextNetwork]);
+    console.log('Current Network:', network);
+  }, [network]);
 
   const [copied, setCopied] = useState(false);
   const [showError, setShowError] = useState(false);
