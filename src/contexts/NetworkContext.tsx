@@ -39,10 +39,10 @@ export const NetworkProvider: React.FC<{ children: ReactNode }> = ({ children })
     setNetworkPassphrase(config.passphrase);
     setHorizonUrl(config.horizonUrl);
     
-    // Update URL without page reload
-    const url = new URL(window.location.href);
-    url.pathname = `/${network}`;
-    window.history.pushState({}, '', url);
+    // Only update URL if we're not already on the root path
+    if (window.location.pathname !== '/') {
+      window.history.replaceState({}, '', '/');
+    }
   }, [network]);
 
   return (

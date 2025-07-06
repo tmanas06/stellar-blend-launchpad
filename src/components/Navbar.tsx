@@ -8,8 +8,9 @@ const Navbar = () => {
   const location = useLocation();
   
   const navItems = [
-    { name: 'Home', path: '/testnet' },
+    { name: 'Home', path: '/' },
     { name: 'Projects', path: '/projects' },
+    { name: 'Blend Services', path: '/blend-services' },
     { name: 'Analytics', path: '/analytics' },
     { name: 'How It Works', path: '/how-it-works' },
     { name: 'Community', path: '/community' },
@@ -19,7 +20,7 @@ const Navbar = () => {
     <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border/40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm shadow-sm">
       <div className="container flex h-full max-w-screen-2xl items-center px-4 sm:px-6 lg:px-8">
         <nav className="flex items-center space-x-1 lg:space-x-2">
-          <Link to="/testnet" className="mr-4">
+          <Link to="/" className="mr-4">
             <span className="text-lg font-bold text-foreground">Stellar Launchpad</span>
           </Link>
           

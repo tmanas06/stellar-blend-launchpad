@@ -1,18 +1,40 @@
+import { useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNetwork } from "@/contexts/NetworkContext";
 import { useWallet } from '@/hooks/useWallet';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from "@/components/ui/use-toast";
 
-interface IndexProps {
-  network: 'testnet' | 'mainnet';
-}
-
-const Index = ({ network }: IndexProps) => {
-  const { network: currentNetwork, setNetwork } = useNetwork();
+const Index = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { network, setNetwork } = useNetwork();
   const { toast } = useToast();
-  const { connect } = useWallet();
+  const { connect, disconnect } = useWallet();
+  const hasInitialized = useRef(false);
+
+  // Handle network from URL or location state
+  useEffect(() => {
+    // Only run this effect once on component mount
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
+    // Disconnect wallet on mount to ensure clean state
+    const initialize = async () => {
+      await disconnect();
+
+      // Check for network in location state
+      const state = location.state as { network?: 'testnet' | 'mainnet' } | undefined;
+      if (state?.network && ['testnet', 'mainnet'].includes(state.network)) {
+        setNetwork(state.network);
+        // Clear the state to avoid reapplying on back/forward navigation
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    };
+
+    initialize();
+  }, [location.state, location.pathname, navigate, setNetwork, disconnect]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">

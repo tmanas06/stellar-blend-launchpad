@@ -53,19 +53,22 @@ const HowItWorks = () => {
       title: "Low Barrier to Entry",
       description: "Start investing with as little as $1 thanks to Stellar's ultra-low fees",
       icon: DollarSign,
-      highlight: "$1 minimum"
+      highlight: "$1 minimum",
+      color: "cyan"
     },
     {
       title: "Vetted Projects",
       description: "All projects go through rigorous SCF evaluation process",
       icon: Shield,
-      highlight: "100% SCF verified"
+      highlight: "100% SCF verified",
+      color: "green"
     },
     {
       title: "Competitive Returns",
       description: "Earn 8-15% APY while supporting innovation",
       icon: TrendingUp,
-      highlight: "8-15% APY"
+      highlight: "8-15% APY",
+      color: "orange"
     },
     {
       title: "Fast & Cheap",

@@ -11,6 +11,7 @@ import Analytics from "./pages/Analytics";
 import HowItWorks from "./pages/HowItWorks";
 import Community from "./pages/Community";
 import Profile from "./pages/Profile";
+import BlendServices from "./pages/BlendServices";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,10 +27,11 @@ const App = () => (
             <Navbar />
             <main className="flex-1 pt-16">
               <Routes>
-                <Route path="/" element={<Navigate to="/testnet" replace />} />
-                <Route path="/testnet" element={<Index network="testnet" />} />
-                <Route path="/mainnet" element={<Index network="mainnet" />} />
+                <Route path="/" element={<Index />} />
+                <Route path="/testnet" element={<Navigate to="/" replace state={{ network: 'testnet' }} />} />
+                <Route path="/mainnet" element={<Navigate to="/" replace state={{ network: 'mainnet' }} />} />
                 <Route path="/projects" element={<Projects />} />
+                <Route path="/blend-services" element={<BlendServices />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/how-it-works" element={<HowItWorks />} />
                 <Route path="/community" element={<Community />} />
