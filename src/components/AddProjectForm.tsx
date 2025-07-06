@@ -7,12 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { storeProjectData } from "@/utils/ipfsStorage";
 import { getConnectedAccount } from "@/utils/walletConnect";
+import { saveProjectToStorage, StoredProject } from "@/utils/projectStorage";
 
 interface AddProjectFormProps {
   onClose: () => void;
+  onProjectAdded?: () => void;
 }
 
-const AddProjectForm = ({ onClose }: AddProjectFormProps) => {
+const AddProjectForm = ({ onClose, onProjectAdded }: AddProjectFormProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -61,10 +63,25 @@ const AddProjectForm = ({ onClose }: AddProjectFormProps) => {
       
       console.log("Project stored on IPFS with hash:", ipfsHash);
       
+      // Create stored project for local storage
+      const storedProject: StoredProject = {
+        id: `project_${Date.now()}`,
+        ipfsHash,
+        ...projectData
+      };
+      
+      // Save to local storage
+      saveProjectToStorage(storedProject);
+      
       toast({
         title: "Project Submitted Successfully!",
-        description: `Your project has been stored on IPFS (${ipfsHash.slice(0, 8)}...) and submitted for review.`,
+        description: `Your project "${formData.name}" has been created and is now available.`,
       });
+      
+      // Notify parent component that a project was added
+      if (onProjectAdded) {
+        onProjectAdded();
+      }
       
       onClose();
     } catch (error: any) {

@@ -42,7 +42,7 @@ export const connectWallet = async (): Promise<string | null> => {
     const signClient = await initializeWalletConnect();
     
     const { uri, approval } = await signClient.connect({
-      requiredNamespaces: {
+      optionalNamespaces: {
         stellar: {
           methods: ['stellar_signTransaction', 'stellar_signMessage'],
           chains: ['stellar:pubnet'],
@@ -52,9 +52,20 @@ export const connectWallet = async (): Promise<string | null> => {
     });
 
     if (uri) {
-      // Open WalletConnect modal or redirect to wallet
+      // Create a more user-friendly connection flow
+      console.log('WalletConnect URI:', uri);
+      
+      // Instead of opening a new window, we could show the QR code or deep link
+      // For now, let's try a direct approach
       const walletConnectUrl = `https://walletconnect.com/qr?uri=${encodeURIComponent(uri)}`;
-      window.open(walletConnectUrl, '_blank');
+      
+      // Open in the same window to avoid 404 issues
+      const newWindow = window.open(walletConnectUrl, '_blank', 'width=400,height=600');
+      
+      if (!newWindow) {
+        // Fallback: copy URI to clipboard or show it to user
+        console.log('Please scan this QR code with your wallet:', uri);
+      }
     }
 
     const session = await approval();

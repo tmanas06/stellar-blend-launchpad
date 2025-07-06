@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -9,6 +8,7 @@ import { Search, Filter, SortAsc, Plus, Users, Code } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import ProjectCard from "@/components/ProjectCard";
 import AddProjectForm from "@/components/AddProjectForm";
+import { getProjectsFromStorage, StoredProject } from "@/utils/projectStorage";
 
 const Projects = () => {
   const [connectedWallet, setConnectedWallet] = useState(false);
@@ -17,15 +17,29 @@ const Projects = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [userRole, setUserRole] = useState<"investor" | "developer">("investor");
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
+  const [projects, setProjects] = useState<StoredProject[]>([]);
 
-  // Empty projects array - will be populated via add project functionality
-  const allProjects: any[] = [];
+  // Load projects from storage on component mount
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = () => {
+    const storedProjects = getProjectsFromStorage();
+    setProjects(storedProjects);
+    console.log('Loaded projects:', storedProjects);
+  };
 
   const handleConnectWallet = (publicKey: string) => {
     setConnectedWallet(true);
   };
 
-  const filteredProjects = allProjects
+  const handleProjectAdded = () => {
+    // Reload projects when a new one is added
+    loadProjects();
+  };
+
+  const filteredProjects = projects
     .filter(project => 
       project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -38,7 +52,7 @@ const Projects = () => {
         case "apy": return b.apy - a.apy;
         case "funded": return b.currentAmount - a.currentAmount;
         case "ending": return a.daysRemaining - b.daysRemaining;
-        default: return b.id - a.id;
+        default: return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
     });
 
@@ -150,7 +164,10 @@ const Projects = () => {
                         <DialogHeader>
                           <DialogTitle className="text-2xl font-bold text-white">Create New Project</DialogTitle>
                         </DialogHeader>
-                        <AddProjectForm onClose={() => setIsAddProjectOpen(false)} />
+                        <AddProjectForm 
+                          onClose={() => setIsAddProjectOpen(false)} 
+                          onProjectAdded={handleProjectAdded}
+                        />
                       </DialogContent>
                     </Dialog>
                   )}
@@ -178,7 +195,7 @@ const Projects = () => {
                 <p className="text-gray-500">
                   {userRole === "developer" 
                     ? "Create the first project to get started!" 
-                    : "Switch to Developer mode to add projects."}
+                    : "Switch to Developer mode to add projects or ask developers to create projects."}
                 </p>
               </div>
             )}
