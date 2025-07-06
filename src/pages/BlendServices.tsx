@@ -1,34 +1,89 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNetwork } from '@/contexts/NetworkContext';
 import { useFreighter } from '@/hooks/useFreighter';
-import { Wallet } from 'lucide-react';
+import { Wallet, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { getContracts } from '@/config/contracts';
+
+interface Service {
+  title: string;
+  description: string;
+  action: string;
+  disabled: boolean;
+  id: string;
+}
 
 export default function BlendServices() {
   const { network } = useNetwork();
-  const { publicKey, isConnected, isLoading, connect } = useFreighter();
+  const { publicKey, isConnected, isLoading, connect, signTransaction } = useFreighter();
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
-  const services = [
+  const services: Service[] = [
     {
+      id: 'liquidity',
       title: 'Liquidity Pools',
       description: 'Provide liquidity to earn trading fees and rewards',
       action: 'Add Liquidity',
       disabled: false,
     },
     {
+      id: 'yield',
       title: 'Yield Farming',
       description: 'Stake your LP tokens to earn additional rewards',
       action: 'Stake LP Tokens',
       disabled: true,
     },
     {
+      id: 'lending',
       title: 'Lending & Borrowing',
       description: 'Lend your assets to earn interest or borrow against your collateral',
       action: 'Coming Soon',
       disabled: true,
     },
   ];
+
+  const handleServiceAction = async (service: Service) => {
+    if (service.disabled) return;
+  
+    if (!isConnected) {
+      await connect();
+      return;
+    }
+  
+    const processTransaction = async () => {
+      try {
+        setIsProcessing(service.id);
+        
+        if (service.id === 'liquidity') {
+          const networkType = network === 'testnet' ? 'TESTNET' : 'MAINNET';
+          const contracts = getContracts(networkType);
+          
+          // Example: Use the pool factory address
+          const poolFactoryAddress = contracts.POOL_FACTORY;
+          toast.info(`Connecting to pool factory at: ${poolFactoryAddress}`);
+          
+          // Here you would:
+          // 1. Create a transaction to add liquidity
+          // 2. Sign it with the wallet
+          // 3. Submit it to the network
+  
+          // Simulate transaction processing
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          toast.success('Liquidity added successfully!');
+        }
+      } catch (error) {
+        console.error('Transaction failed:', error);
+        toast.error('Failed to process transaction');
+      } finally {
+        setIsProcessing(null);
+      }
+    };
+  
+    setTimeout(processTransaction, 0);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
@@ -86,9 +141,17 @@ export default function BlendServices() {
                   <Button 
                     variant={service.disabled ? "outline" : "default"}
                     className={`w-full ${!service.disabled ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700' : ''}`}
-                    disabled={service.disabled}
+                    disabled={service.disabled || isProcessing === service.id}
+                    onClick={() => handleServiceAction(service)}
                   >
-                    {service.action}
+                    {isProcessing === service.id ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      service.action
+                    )}
                   </Button>
                 </CardContent>
               </Card>
