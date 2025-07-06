@@ -16,7 +16,7 @@ let walletConnectState: WalletConnectState = {
   isConnected: false
 };
 
-const PROJECT_ID = '00cf7cc876a27af4a8b4a282dba59d20';
+const PROJECT_ID = '0f34d3af4c10a27af4a8b4a282dba79a33b4566bf';
 
 export const initializeWalletConnect = async (): Promise<InstanceType<typeof SignClient>> => {
   if (walletConnectState.signClient) {
