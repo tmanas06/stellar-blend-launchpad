@@ -42,15 +42,36 @@ export const WalletConnect: React.FC<{
     disconnect();
   };
 
-  const copyToClipboard = () => {
-    if (!publicKey) return;
-    navigator.clipboard.writeText(publicKey);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  // Helper to get the address string from publicKey (handles both string and object formats)
+  const getAddressString = (key: any): string => {
+    if (!key) return '';
+    if (typeof key === 'string') return key;
+    if (typeof key === 'object' && key !== null && 'address' in key) {
+      return key.address;
+    }
+    console.warn('Unexpected public key format:', key);
+    return '';
   };
 
-  const formatAddress = (address: string | undefined | null) => {
-    if (!address || typeof address !== 'string') return '';
+  const copyToClipboard = () => {
+    const address = getAddressString(publicKey);
+    if (!address) {
+      console.error('No public key available to copy');
+      return;
+    }
+    console.log('Copying public key:', address);
+    try {
+      navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+    }
+  };
+
+  const formatAddress = (key: any) => {
+    const address = getAddressString(key);
+    if (!address) return '';
     if (address.length <= 10) return address; // Return as is if too short to format
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
