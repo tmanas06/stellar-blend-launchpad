@@ -1,10 +1,16 @@
 
 // IPFS storage utility using Pinata
-const PINATA_API_KEY = '0bef2f837138d54e5e34';
-const PINATA_SECRET_KEY = '31b0f6471d3f74d21678dbf703b93cb4ad574af4eb18b3e1f7f07bab8f35b75e';
-const PINATA_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI2YzY1MjM1Yy00NmU4LTRmYmUtODkzNy00MGM4OTk4ZDVlNDgiLCJlbWFpbCI6IjIyMTAwMzAwMDNjc2VAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6IjBiZWYyZjgzNzEzOGQ1NGU1ZTM0Iiwic2NvcGVkS2V5U2VjcmV0IjoiMzFiMGY2NDcxZDNmNzRkMjE2NzhkYmY3MDNiOTNjYjRhZDU3NGFmNGViMThiM2UxZjdmMDdiYWI4ZjM1Yjc1ZSIsImV4cCI6MTc4MzI3MDU4M30.cNGTz1zZV7SBT8Y_7VRbqtEXNVGG0wdq-yXylJVdn18';
+// Load environment variables
+const PINATA_API_KEY = import.meta.env.VITE_PINATA_API_KEY || '';
+const PINATA_SECRET_KEY = import.meta.env.VITE_PINATA_SECRET_KEY || '';
+const PINATA_JWT = import.meta.env.VITE_PINATA_JWT || '';
 
 const PINATA_BASE_URL = 'https://api.pinata.cloud';
+
+// Validate required environment variables
+if (!PINATA_JWT && (!PINATA_API_KEY || !PINATA_SECRET_KEY)) {
+  console.warn('⚠️ Missing Pinata API credentials. Please set VITE_PINATA_JWT or both VITE_PINATA_API_KEY and VITE_PINATA_SECRET_KEY in your .env file');
+}
 
 export interface IPFSUploadResult {
   IpfsHash: string;
@@ -49,11 +55,21 @@ export const uploadToIPFS = async (data: any, name?: string): Promise<IPFSUpload
       }));
     }
 
+    // Use JWT if available, otherwise use API key/secret
+    const headers: HeadersInit = {};
+    
+    if (PINATA_JWT) {
+      headers['Authorization'] = `Bearer ${PINATA_JWT}`;
+    } else if (PINATA_API_KEY && PINATA_SECRET_KEY) {
+      headers['pinata_api_key'] = PINATA_API_KEY;
+      headers['pinata_secret_api_key'] = PINATA_SECRET_KEY;
+    } else {
+      throw new Error('No valid Pinata authentication method found. Please check your environment variables.');
+    }
+
     const response = await fetch(`${PINATA_BASE_URL}/pinning/pinFileToIPFS`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${PINATA_JWT}`
-      },
+      headers: headers,
       body: formData
     });
 
