@@ -3,7 +3,7 @@ import { SignClient } from '@walletconnect/sign-client';
 import { SessionTypes } from '@walletconnect/types';
 
 export interface WalletConnectState {
-  signClient: SignClient | null;
+  signClient: InstanceType<typeof SignClient> | null;
   session: SessionTypes.Struct | null;
   accounts: string[];
   isConnected: boolean;
@@ -18,7 +18,7 @@ let walletConnectState: WalletConnectState = {
 
 const PROJECT_ID = '00cf7cc876a27af4a8b4a282dba59d20';
 
-export const initializeWalletConnect = async (): Promise<SignClient> => {
+export const initializeWalletConnect = async (): Promise<InstanceType<typeof SignClient>> => {
   if (walletConnectState.signClient) {
     return walletConnectState.signClient;
   }
