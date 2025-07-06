@@ -7,7 +7,7 @@ import { ArrowRight, Users, Clock, Shield, HandHeart } from "lucide-react";
 
 interface ProjectCardProps {
   project: {
-    id: number;
+    id: string;
     name: string;
     description: string;
     category: string;
