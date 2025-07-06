@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { storeProjectData } from "@/utils/ipfsStorage";
-import { getFreighterPublicKey } from "@/utils/freighterWallet";
+import { getConnectedAccount } from "@/utils/walletConnect";
 
 interface AddProjectFormProps {
   onClose: () => void;
@@ -33,7 +33,7 @@ const AddProjectForm = ({ onClose }: AddProjectFormProps) => {
     
     try {
       // Get connected wallet public key
-      const publicKey = await getFreighterPublicKey();
+      const publicKey = getConnectedAccount();
       
       // Prepare project data for IPFS
       const projectData = {
@@ -46,6 +46,10 @@ const AddProjectForm = ({ onClose }: AddProjectFormProps) => {
         duration: parseInt(formData.duration),
         minInvestment: parseInt(formData.minInvestment),
         teamSize: parseInt(formData.teamSize),
+        currentAmount: 0,
+        lenders: 0,
+        scfRound: 17,
+        daysRemaining: parseInt(formData.duration),
         createdBy: publicKey || 'anonymous',
         createdAt: new Date().toISOString()
       };
@@ -101,10 +105,10 @@ const AddProjectForm = ({ onClose }: AddProjectFormProps) => {
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-600">
-              <SelectItem value="defi">DeFi</SelectItem>
-              <SelectItem value="infrastructure">Infrastructure</SelectItem>
-              <SelectItem value="gaming">Gaming</SelectItem>
-              <SelectItem value="social">Social</SelectItem>
+              <SelectItem value="DeFi">DeFi</SelectItem>
+              <SelectItem value="Infrastructure">Infrastructure</SelectItem>
+              <SelectItem value="Gaming">Gaming</SelectItem>
+              <SelectItem value="Social">Social</SelectItem>
             </SelectContent>
           </Select>
         </div>

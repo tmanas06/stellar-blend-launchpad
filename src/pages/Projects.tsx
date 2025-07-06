@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,100 +18,10 @@ const Projects = () => {
   const [userRole, setUserRole] = useState<"investor" | "developer">("investor");
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
 
-  const allProjects = [
-    {
-      id: 1,
-      name: "StellarPay Pro",
-      description: "Next-generation payment infrastructure for Stellar ecosystem with advanced smart contract capabilities",
-      category: "DeFi",
-      targetAmount: 250000,
-      currentAmount: 180000,
-      apy: 12.5,
-      riskLevel: "Medium",
-      daysRemaining: 15,
-      minInvestment: 10,
-      lenders: 156,
-      scfRound: 17,
-      teamSize: 5
-    },
-    {
-      id: 2,
-      name: "Luminary Analytics",
-      description: "Advanced blockchain analytics and reporting tools for the Stellar network",
-      category: "Infrastructure",
-      targetAmount: 150000,
-      currentAmount: 95000,
-      apy: 10.2,
-      riskLevel: "Low",
-      daysRemaining: 8,
-      minInvestment: 1,
-      lenders: 203,
-      scfRound: 16,
-      teamSize: 3
-    },
-    {
-      id: 3,
-      name: "AstroVault Gaming",
-      description: "Decentralized gaming platform with NFT integration and play-to-earn mechanics",
-      category: "Gaming",
-      targetAmount: 500000,
-      currentAmount: 125000,
-      apy: 15.8,
-      riskLevel: "High",
-      daysRemaining: 22,
-      minInvestment: 25,
-      lenders: 89,
-      scfRound: 17,
-      teamSize: 8
-    },
-    {
-      id: 4,
-      name: "StellarBridge",
-      description: "Cross-chain bridge connecting Stellar to major blockchain networks",
-      category: "Infrastructure",
-      targetAmount: 400000,
-      currentAmount: 280000,
-      apy: 13.2,
-      riskLevel: "Medium",
-      daysRemaining: 12,
-      minInvestment: 50,
-      lenders: 178,
-      scfRound: 17,
-      teamSize: 6
-    },
-    {
-      id: 5,
-      name: "Community Hub",
-      description: "Social platform for Stellar developers and community members",
-      category: "Social",
-      targetAmount: 100000,
-      currentAmount: 65000,
-      apy: 9.5,
-      riskLevel: "Low",
-      daysRemaining: 30,
-      minInvestment: 5,
-      lenders: 145,
-      scfRound: 16,
-      teamSize: 4
-    },
-    {
-      id: 6,
-      name: "DeFi Yield Optimizer",
-      description: "Automated yield farming and optimization protocol for Stellar DeFi",
-      category: "DeFi",
-      targetAmount: 300000,
-      currentAmount: 45000,
-      apy: 16.7,
-      riskLevel: "High",
-      daysRemaining: 45,
-      minInvestment: 100,
-      lenders: 67,
-      scfRound: 17,
-      teamSize: 7
-    }
-  ];
+  // Empty projects array - will be populated via add project functionality
+  const allProjects: any[] = [];
 
-  const handleConnectWallet = () => {
+  const handleConnectWallet = (publicKey: string) => {
     setConnectedWallet(true);
   };
 
@@ -255,15 +166,20 @@ const Projects = () => {
         {/* Projects Grid */}
         <section className="pb-20 px-4">
           <div className="max-w-7xl mx-auto">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} userRole={userRole} />
-              ))}
-            </div>
-            
-            {filteredProjects.length === 0 && (
+            {filteredProjects.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredProjects.map((project) => (
+                  <ProjectCard key={project.id} project={project} userRole={userRole} />
+                ))}
+              </div>
+            ) : (
               <div className="text-center py-16">
-                <p className="text-gray-400 text-lg">No projects found matching your criteria.</p>
+                <p className="text-gray-400 text-lg mb-6">No projects found.</p>
+                <p className="text-gray-500">
+                  {userRole === "developer" 
+                    ? "Create the first project to get started!" 
+                    : "Switch to Developer mode to add projects."}
+                </p>
               </div>
             )}
           </div>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import { ArrowRight, Shield, TrendingUp, Users, Zap } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import ProjectCard from "@/components/ProjectCard";
 import StatsSection from "@/components/StatsSection";
-import { connectFreighterWallet, isFreighterInstalled } from "@/utils/freighterWallet";
+import { connectWallet } from "@/utils/walletConnect";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -17,66 +16,12 @@ const Index = () => {
   const [walletPublicKey, setWalletPublicKey] = useState<string>("");
   const { toast } = useToast();
 
-  const featuredProjects = [
-    {
-      id: 1,
-      name: "StellarPay Pro",
-      description: "Next-generation payment infrastructure for Stellar ecosystem",
-      category: "DeFi",
-      targetAmount: 250000,
-      currentAmount: 180000,
-      apy: 12.5,
-      riskLevel: "Medium",
-      daysRemaining: 15,
-      minInvestment: 10,
-      lenders: 156,
-      scfRound: 17,
-      teamSize: 5
-    },
-    {
-      id: 2,
-      name: "Luminary Analytics",
-      description: "Advanced blockchain analytics and reporting tools",
-      category: "Infrastructure",
-      targetAmount: 150000,
-      currentAmount: 95000,
-      apy: 10.2,
-      riskLevel: "Low",
-      daysRemaining: 8,
-      minInvestment: 1,
-      lenders: 203,
-      scfRound: 16,
-      teamSize: 3
-    },
-    {
-      id: 3,
-      name: "AstroVault Gaming",
-      description: "Decentralized gaming platform with NFT integration",
-      category: "Gaming",
-      targetAmount: 500000,
-      currentAmount: 125000,
-      apy: 15.8,
-      riskLevel: "High",
-      daysRemaining: 22,
-      minInvestment: 25,
-      lenders: 89,
-      scfRound: 17,
-      teamSize: 8
-    }
-  ];
+  // Empty projects array - will be populated via add project functionality
+  const featuredProjects: any[] = [];
 
   const handleConnectWallet = async () => {
-    if (!isFreighterInstalled()) {
-      toast({
-        title: "Freighter Wallet Required",
-        description: "Please install Freighter wallet extension to continue.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
-      const publicKey = await connectFreighterWallet();
+      const publicKey = await connectWallet();
       if (publicKey) {
         setConnectedWallet(true);
         setWalletPublicKey(publicKey);
@@ -89,7 +34,7 @@ const Index = () => {
     } catch (error: any) {
       toast({
         title: "Connection Failed",
-        description: error.message || "Failed to connect to Freighter wallet",
+        description: error.message || "Failed to connect wallet",
         variant: "destructive"
       });
     }
@@ -227,11 +172,18 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} userRole={userRole} />
-              ))}
-            </div>
+            {featuredProjects.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {featuredProjects.map((project) => (
+                  <ProjectCard key={project.id} project={project} userRole={userRole} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <p className="text-gray-400 text-lg mb-6">No projects available yet.</p>
+                <p className="text-gray-500">Be the first to add a project and start the revolution!</p>
+              </div>
+            )}
             
             <div className="text-center mt-12">
               <Button 
