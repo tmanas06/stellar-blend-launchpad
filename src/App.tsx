@@ -1,9 +1,10 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { NetworkProvider } from "./contexts/NetworkContext";
+import Navbar from "./components/Navbar";
 import Index from "./pages/Index";
 import Projects from "./pages/Projects";
 import Analytics from "./pages/Analytics";
@@ -19,20 +20,29 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/profile/:publicKey" element={<Profile />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <NetworkProvider>
+        <BrowserRouter>
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-1 pt-16">
+              <Routes>
+                <Route path="/" element={<Navigate to="/testnet" replace />} />
+                <Route path="/testnet" element={<Index network="testnet" />} />
+                <Route path="/mainnet" element={<Index network="mainnet" />} />
+                <Route path="/projects" element={<Projects />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/community" element={<Community />} />
+                <Route path="/profile/:publicKey" element={<Profile />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+          </div>
+        </BrowserRouter>
+      </NetworkProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
+
 
 export default App;

@@ -1,4 +1,7 @@
 
+// Import the shared Freighter API types
+import type { IsConnectedResponse, AddressResponse } from '@stellar/freighter-api';
+
 // Freighter wallet integration for Stellar
 export interface FreighterWalletState {
   isConnected: boolean;
@@ -8,9 +11,10 @@ export interface FreighterWalletState {
 
 declare global {
   interface Window {
-    freighter: {
-      isConnected(): Promise<boolean>;
+    freighter?: {
+      isConnected(): Promise<IsConnectedResponse>;
       getPublicKey(): Promise<string>;
+      getAddress(): Promise<AddressResponse>;
       signTransaction(xdr: string, network?: string): Promise<string>;
       requestAccess(): Promise<string>;
       isAllowed(): Promise<boolean>;
@@ -32,23 +36,19 @@ export const checkFreighterInstalled = (): boolean => {
 
 export const connectFreighterWallet = async (): Promise<string | null> => {
   try {
-    if (!checkFreighterInstalled()) {
+    if (!checkFreighterInstalled() || !window.freighter) {
       throw new Error('Freighter wallet is not installed. Please install it from https://www.freighter.app/');
     }
-
-    console.log('Requesting Freighter wallet access...');
-    const publicKey = await window.freighter.requestAccess();
     
+    const publicKey = await window.freighter.requestAccess();
     if (publicKey) {
       walletState.isConnected = true;
       walletState.publicKey = publicKey;
-      console.log('Freighter wallet connected:', publicKey);
       return publicKey;
     }
-    
     throw new Error('Failed to get public key from Freighter');
   } catch (error) {
-    console.error('Failed to connect Freighter wallet:', error);
+    console.error('Error connecting to Freighter:', error);
     walletState.isConnected = false;
     walletState.publicKey = null;
     throw error;
@@ -63,21 +63,19 @@ export const disconnectFreighterWallet = (): void => {
 
 export const getFreighterPublicKey = async (): Promise<string | null> => {
   try {
-    if (!checkFreighterInstalled()) {
+    if (!checkFreighterInstalled() || !window.freighter) {
       return null;
     }
-
-    const isConnected = await window.freighter.isConnected();
-    if (isConnected) {
-      const publicKey = await window.freighter.getPublicKey();
-      walletState.isConnected = true;
+    
+    const publicKey = await window.freighter.getPublicKey();
+    if (publicKey) {
       walletState.publicKey = publicKey;
+      walletState.isConnected = true;
       return publicKey;
     }
-    
     return null;
   } catch (error) {
-    console.error('Error getting Freighter public key:', error);
+    console.error('Error getting public key from Freighter:', error);
     return null;
   }
 };
