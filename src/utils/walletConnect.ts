@@ -1,4 +1,3 @@
-
 import { SignClient } from '@walletconnect/sign-client';
 import { SessionTypes } from '@walletconnect/types';
 
@@ -19,29 +18,42 @@ let walletConnectState: WalletConnectState = {
 const PROJECT_ID = '0f34d3af4c10a27af4a8b4a282dba79a33b4566bf';
 
 export const initializeWalletConnect = async (): Promise<InstanceType<typeof SignClient>> => {
+  // Prevent multiple initializations
   if (walletConnectState.signClient) {
+    console.log('WalletConnect already initialized, returning existing client');
     return walletConnectState.signClient;
   }
 
-  const signClient = await SignClient.init({
-    projectId: PROJECT_ID,
-    metadata: {
-      name: 'Blend SCF Launchpad',
-      description: 'Invest in vetted Stellar Community Fund projects',
-      url: window.location.origin,
-      icons: ['https://walletconnect.com/walletconnect-logo.png']
-    }
-  });
+  try {
+    console.log('Initializing WalletConnect with project ID:', PROJECT_ID);
+    
+    const signClient = await SignClient.init({
+      projectId: PROJECT_ID,
+      metadata: {
+        name: 'Blend SCF Launchpad',
+        description: 'Invest in vetted Stellar Community Fund projects',
+        url: window.location.origin,
+        icons: [`${window.location.origin}/favicon.ico`]
+      }
+    });
 
-  walletConnectState.signClient = signClient;
-  return signClient;
+    walletConnectState.signClient = signClient;
+    console.log('WalletConnect initialized successfully');
+    return signClient;
+  } catch (error) {
+    console.error('Failed to initialize WalletConnect:', error);
+    throw error;
+  }
 };
 
 export const connectWallet = async (): Promise<string | null> => {
   try {
     const signClient = await initializeWalletConnect();
     
+    console.log('Starting wallet connection...');
+    
     const { uri, approval } = await signClient.connect({
+      requiredNamespaces: {},
       optionalNamespaces: {
         stellar: {
           methods: ['stellar_signTransaction', 'stellar_signMessage'],
@@ -52,35 +64,59 @@ export const connectWallet = async (): Promise<string | null> => {
     });
 
     if (uri) {
-      // Create a more user-friendly connection flow
-      console.log('WalletConnect URI:', uri);
+      console.log('WalletConnect URI generated:', uri);
       
-      // Instead of opening a new window, we could show the QR code or deep link
-      // For now, let's try a direct approach
-      const walletConnectUrl = `https://walletconnect.com/qr?uri=${encodeURIComponent(uri)}`;
+      // Show the URI to the user - they can scan it with their wallet
+      const shouldOpenWallet = window.confirm(
+        'Please scan the QR code with your Stellar wallet or copy the connection URI. Click OK to continue.'
+      );
       
-      // Open in the same window to avoid 404 issues
-      const newWindow = window.open(walletConnectUrl, '_blank', 'width=400,height=600');
-      
-      if (!newWindow) {
-        // Fallback: copy URI to clipboard or show it to user
-        console.log('Please scan this QR code with your wallet:', uri);
+      if (shouldOpenWallet) {
+        // Try to open wallet apps directly
+        const walletConnectUri = `wc:${uri.split('wc:')[1]}`;
+        
+        // Try different wallet deep links
+        const walletUrls = [
+          `lobstr://wc?uri=${encodeURIComponent(walletConnectUri)}`, // Lobstr
+          `stellarterm://wc?uri=${encodeURIComponent(walletConnectUri)}`, // StellarTerm
+          `freighter://wc?uri=${encodeURIComponent(walletConnectUri)}` // Freighter
+        ];
+        
+        // Try opening each wallet
+        for (const walletUrl of walletUrls) {
+          try {
+            window.open(walletUrl, '_blank');
+            await new Promise(resolve => setTimeout(resolve, 500)); // Small delay between attempts
+          } catch (e) {
+            console.log('Could not open wallet:', walletUrl);
+          }
+        }
+        
+        console.log('Connection URI for manual use:', uri);
       }
     }
 
+    console.log('Waiting for wallet approval...');
     const session = await approval();
+    
     walletConnectState.session = session;
     walletConnectState.accounts = session.namespaces.stellar?.accounts || [];
     walletConnectState.isConnected = true;
 
     // Extract public key from account (format: stellar:pubnet:PUBLICKEY)
     const publicKey = walletConnectState.accounts[0]?.split(':')[2];
-    console.log('Connected to wallet:', publicKey);
+    console.log('Wallet connected successfully. Public key:', publicKey);
     
     return publicKey || null;
   } catch (error) {
     console.error('Failed to connect wallet:', error);
-    throw new Error('Failed to connect to wallet. Please try again.');
+    
+    // Reset state on error
+    walletConnectState.session = null;
+    walletConnectState.accounts = [];
+    walletConnectState.isConnected = false;
+    
+    throw new Error('Failed to connect to wallet. Please make sure you have a Stellar wallet installed and try again.');
   }
 };
 
