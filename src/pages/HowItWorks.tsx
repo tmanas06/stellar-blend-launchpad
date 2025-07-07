@@ -169,7 +169,7 @@ const HowItWorks = () => {
                       <benefit.icon className="h-6 w-6 text-cyan-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-white mb-2">{benefit.title}</h3>
-                    <p className="text-gray-400 text-sm mb-3">{benefit.description}</p>
+                    <p className="text-white text-sm mb-3">{benefit.description}</p>
                     <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
                       {benefit.highlight}
                     </Badge>

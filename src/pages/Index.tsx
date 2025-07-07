@@ -37,12 +37,12 @@ const Index = () => {
   }, [location.state, location.pathname, navigate, setNetwork, disconnect]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
       {/* Animated gradient background */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-1/3 left-1/3 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/3 right-1/3 w-64 h-64 bg-pink-500/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        <div className="absolute top-1/3 left-1/3 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/3 right-1/3 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-3000"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/50 to-black/70"></div>
       </div>
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
@@ -90,10 +90,12 @@ const Index = () => {
                 icon: '🌐'
               }
             ].map((feature, index) => (
-              <Card key={index} className="p-6 bg-white/5 backdrop-blur-sm border border-white/10">
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-300">{feature.description}</p>
+              <Card key={index} className="bg-gray-900/50 backdrop-blur-sm border-2 border-gray-700 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20">
+                <CardContent className="p-6 text-center">
+                  <div className="text-4xl mb-4">{feature.icon}</div>
+                  <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
+                  <p className="text-white text-sm">{feature.description}</p>
+                </CardContent>
               </Card>
             ))}
           </div>
@@ -101,7 +103,7 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-cyan-900/30 to-blue-900/30">
+      <section className="py-20 px-4 bg-black/20 backdrop-blur-sm border-y border-gray-800/50">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Launch Your Project?</h2>
           <p className="text-xl text-gray-300 mb-8">Join the Stellar Launchpad and connect with investors from around the world.</p>
@@ -109,7 +111,7 @@ const Index = () => {
             <Button 
               asChild
               size="lg" 
-              className="bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-6 text-lg font-semibold rounded-xl"
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8 py-6 text-lg font-semibold rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/30 transition-all duration-300"
             >
               <Link to="/projects">
                 Get Started
@@ -118,7 +120,7 @@ const Index = () => {
             <Button 
               variant="outline" 
               size="lg" 
-              className="border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400/10 hover:text-cyan-300 px-8 py-6 text-lg font-semibold rounded-xl"
+              className="border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400/10 hover:text-cyan-300 px-8 py-6 text-lg font-semibold rounded-xl transition-all duration-300"
             >
               Learn More
             </Button>
@@ -127,7 +129,7 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-black/50 py-12 px-4">
+      <footer className="bg-black/80 backdrop-blur-sm py-12 px-4 border-t border-gray-800/50">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
@@ -167,7 +169,7 @@ const Index = () => {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800/50 mt-8 pt-8 text-center text-gray-400">
             <p>© {new Date().getFullYear()} Stellar Launchpad. Built on Stellar.</p>
           </div>
         </div>
