@@ -118,11 +118,14 @@ const Index = () => {
               </Link>
             </Button>
             <Button 
+              asChild
               variant="outline" 
               size="lg" 
               className="border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400/10 hover:text-cyan-300 px-8 py-6 text-lg font-semibold rounded-xl transition-all duration-300"
             >
-              Learn More
+              <Link to="/how-it-works">
+                Learn More
+              </Link>
             </Button>
           </div>
         </div>
