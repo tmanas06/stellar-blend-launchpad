@@ -174,6 +174,50 @@ export default function BlendServices() {
             ))}
           </div>
         )}
+
+        {/* Testnet Information */}
+        {network === 'testnet' && isConnected && (
+          <div className="mt-12 bg-gray-900/50 backdrop-blur-sm border border-cyan-500/30 rounded-xl overflow-hidden">
+            <div className="p-4 bg-cyan-900/20 border-b border-cyan-500/20">
+              <h3 className="text-lg font-semibold text-cyan-400 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Testnet Demo Data
+              </h3>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                <div className="bg-gray-800/50 p-4 rounded-lg">
+                  <p className="text-gray-300 text-sm font-mono flex items-start gap-2">
+                    <span className="text-cyan-400">🧪</span>
+                    <span>Testnet: Generating demo positions for <span className="text-cyan-300 font-medium">{publicKey?.address || publicKey}</span></span>
+                  </p>
+                </div>
+                
+                <div className="bg-gray-800/50 p-4 rounded-lg">
+                  <p className="text-gray-300 text-sm font-mono flex items-start gap-2">
+                    <span className="text-cyan-400">🧪</span>
+                    <span>Generated <span className="text-green-400 font-medium">4 reliable demo positions</span> for testnet showcase</span>
+                  </p>
+                </div>
+                
+                <div className="bg-gray-800/50 p-4 rounded-lg border-l-4 border-green-500/50">
+                  <p className="text-gray-300 text-sm font-mono flex items-start gap-2">
+                    <span className="text-green-400">💰</span>
+                    <span>Total demo portfolio value: <span className="text-green-400 font-bold">$50,910</span></span>
+                  </p>
+                </div>
+                
+                <div className="mt-6 bg-cyan-900/20 p-4 rounded-lg border border-cyan-500/20">
+                  <p className="text-cyan-300 text-xs text-center">
+                    This is demo data for testing purposes only
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
